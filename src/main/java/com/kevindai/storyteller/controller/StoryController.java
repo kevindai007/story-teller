@@ -7,16 +7,15 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.embedding.EmbeddingRequest;
-import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.ai.model.Media;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
-import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,14 +44,20 @@ public class StoryController {
     }
 
 
-    @GetMapping("/stream-story")
-    public String getStreamStory(@RequestParam String input) {
-        Flux<String> output = chatClient.prompt()
-                .user(input)
+    @GetMapping(
+            value    = "/stream-story",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
+    public Flux<ServerSentEvent<String>> streamStory(@RequestParam String input) {
+        return chatClient.prompt()
+                .user(u -> u.text(input))
                 .stream()
-                .content();
-        String content = String.join("", Objects.requireNonNull(output.collectList().block()));
-        return content;
+                .content()
+                // wrap each chunk into an SSE event
+                .map(chunk -> ServerSentEvent.<String>builder()
+                        .data(chunk)
+                        .build()
+                );
     }
 
     @GetMapping("/image-story")
@@ -66,6 +71,7 @@ public class StoryController {
                 OpenAiChatOptions.builder().withModel(OpenAiApi.ChatModel.GPT_4_O.getValue()).build()));
         return response.getResults().getFirst().getOutput().getContent();
     }
+
     @GetMapping("/function-test")
     public String functionTest(@RequestParam String input) {
         String weatherFunction1 = chatClient.prompt().user(input).function("CurrentWeather", "Get the weather in location", new WeatherService()).call().content();
