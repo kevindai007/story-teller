@@ -24,8 +24,7 @@ public class OpenAiClientConfig {
 
     @Bean
     public OpenAiEmbeddingModel openAiEmbeddingModel() {
-        OpenAiEmbeddingModel embeddingModel = new OpenAiEmbeddingModel(new OpenAiApi(apiKey), MetadataMode.EMBED);
-        return embeddingModel;
+        return new OpenAiEmbeddingModel(new OpenAiApi(apiKey), MetadataMode.EMBED);
     }
 
 }

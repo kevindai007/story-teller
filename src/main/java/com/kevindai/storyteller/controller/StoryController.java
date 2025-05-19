@@ -1,9 +1,15 @@
 package com.kevindai.storyteller.controller;
 
+import com.kevindai.storyteller.enums.StoryTypeEnum;
 import com.kevindai.storyteller.pojo.StoryItem;
+import com.kevindai.storyteller.pojo.StoryTellerDto;
+import com.kevindai.storyteller.service.PostgreChatMemory;
 import com.kevindai.storyteller.service.WeatherService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -17,15 +23,13 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.net.URL;
 import java.util.List;
-import java.util.Objects;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 public class StoryController {
@@ -33,6 +37,7 @@ public class StoryController {
     private final OpenAiEmbeddingModel openAiEmbeddingModel;
     @Value("${openai.api.key}")
     private String apiKey;
+    private final PostgreChatMemory postgreChatMemory;
 
     @GetMapping("/story")
     public String getStory(@RequestParam String input) {
@@ -44,16 +49,19 @@ public class StoryController {
     }
 
 
-    @GetMapping(
-            value    = "/stream-story",
+    @PostMapping(
+            value = "/stream-story",
             produces = MediaType.TEXT_EVENT_STREAM_VALUE
     )
-    public Flux<ServerSentEvent<String>> streamStory(@RequestParam String input) {
+    public Flux<ServerSentEvent<String>> streamStory(@RequestBody StoryTellerDto storyTellerDto) {
         return chatClient.prompt()
-                .user(u -> u.text(input))
+//                .system(s -> StoryTypeEnum.fromType(storyTellerDto.getStoryType()))
+                .user(u -> u.text(storyTellerDto.getInput()))
+                .advisors(new PromptChatMemoryAdvisor(postgreChatMemory))
+                .advisors(advisorSpec -> advisorSpec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 5))
                 .stream()
                 .content()
-                // wrap each chunk into an SSE event
+                .doOnNext(chunk -> log.info("Streaming chunk: {}", chunk)) // Log each chunk
                 .map(chunk -> ServerSentEvent.<String>builder()
                         .data(chunk)
                         .build()
