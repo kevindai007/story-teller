@@ -1,5 +1,6 @@
 package com.kevindai.storyteller.aiconfig;
 
+import com.kevindai.storyteller.advisor.LoggingAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -19,6 +20,7 @@ public class OpenAiClientConfig {
         OpenAiChatModel chatModel = new OpenAiChatModel(new OpenAiApi(apiKey));
         OpenAiEmbeddingModel embeddingModel = new OpenAiEmbeddingModel(new OpenAiApi(apiKey));
         ChatClient.Builder builder = ChatClient.builder(chatModel);
+        builder.defaultAdvisors(new LoggingAdvisor());
         return builder.build();
     }
 

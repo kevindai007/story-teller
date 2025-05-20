@@ -37,6 +37,7 @@ public class StoryController {
     private String apiKey;
     private final PostgreChatMemory postgreChatMemory;
 
+
     @GetMapping("/story")
     public String getStory(@RequestParam String input) {
 //        ChatClient.CallResponseSpec responseSpec = chatClient.prompt().user(input).call();
@@ -56,10 +57,9 @@ public class StoryController {
 //                .system(s -> StoryTypeEnum.fromType(storyTellerDto.getStoryType()))
                 .user(u -> u.text(storyTellerDto.getInput()))
                 .advisors(new MessageChatMemoryAdvisor(postgreChatMemory, storyTellerDto.getConversationId(), 5))
-//                .advisors(advisorSpec -> advisorSpec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 5))
                 .stream()
                 .content()
-                .doOnNext(chunk -> log.info("Streaming chunk: {}", chunk)) // Log each chunk
+//                .doOnNext(chunk -> log.info("Streaming chunk: {}", chunk)) // Log each chunk
                 .map(chunk -> ServerSentEvent.<String>builder()
                         .data(chunk)
                         .build()
