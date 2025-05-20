@@ -1,6 +1,5 @@
 package com.kevindai.storyteller.controller;
 
-import com.kevindai.storyteller.enums.StoryTypeEnum;
 import com.kevindai.storyteller.pojo.StoryItem;
 import com.kevindai.storyteller.pojo.StoryTellerDto;
 import com.kevindai.storyteller.service.PostgreChatMemory;
@@ -8,8 +7,7 @@ import com.kevindai.storyteller.service.WeatherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -57,8 +55,8 @@ public class StoryController {
         return chatClient.prompt()
 //                .system(s -> StoryTypeEnum.fromType(storyTellerDto.getStoryType()))
                 .user(u -> u.text(storyTellerDto.getInput()))
-                .advisors(new PromptChatMemoryAdvisor(postgreChatMemory))
-                .advisors(advisorSpec -> advisorSpec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 5))
+                .advisors(new MessageChatMemoryAdvisor(postgreChatMemory, storyTellerDto.getConversationId(), 5))
+//                .advisors(advisorSpec -> advisorSpec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 5))
                 .stream()
                 .content()
                 .doOnNext(chunk -> log.info("Streaming chunk: {}", chunk)) // Log each chunk

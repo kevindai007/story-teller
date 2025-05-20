@@ -15,6 +15,8 @@ public class StoryTellerDto {
     private String input;
     @NotBlank(message = "story_type is required")
     private String storyType;
+    @NotBlank(message = "conversation_id is required ")
+    private String conversationId;
 
     @JsonIgnore
     @AssertTrue

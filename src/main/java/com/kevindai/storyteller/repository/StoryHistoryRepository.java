@@ -14,5 +14,5 @@ public interface StoryHistoryRepository extends JpaRepository<StoryHistoryEntity
             where sh.conversationId = :conversationId
             order by sh.id desc
             """)
-    Page<StoryHistoryEntity> findByStoryId(Integer storyId, Pageable pageable);
+    Page<StoryHistoryEntity> findByStoryId(String conversationId, Pageable pageable);
 }

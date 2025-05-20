@@ -1,9 +1,12 @@
 package com.kevindai.storyteller.service;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kevindai.storyteller.entity.StoryHistoryEntity;
 import com.kevindai.storyteller.repository.StoryHistoryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.*;
@@ -20,6 +23,7 @@ import java.util.List;
 @Component
 public class PostgreChatMemory implements ChatMemory {
     private final StoryHistoryRepository storyHistoryRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     public void add(String conversationId, List<Message> messages) {
@@ -27,7 +31,9 @@ public class PostgreChatMemory implements ChatMemory {
         for (Message message : messages) {
             StoryHistoryEntity storyHistoryEntity = new StoryHistoryEntity();
             storyHistoryEntity.setConversationId(conversationId);
-            storyHistoryEntity.setMessage(message.getContent());
+            storyHistoryEntity.setMessageType(message.getMessageType().getValue());
+            JsonNode jsonNode = objectMapper.valueToTree(message);
+            storyHistoryEntity.setMessage(jsonNode);
             storyHistoryEntities.add(storyHistoryEntity);
         }
         try {
@@ -38,25 +44,26 @@ public class PostgreChatMemory implements ChatMemory {
         }
     }
 
+    @SneakyThrows
     @Override
     public List<Message> get(String conversationId, int lastN) {
         Pageable pageable = PageRequest.of(0, lastN);
-        Page<StoryHistoryEntity> storyHistoryEntities = storyHistoryRepository.findByStoryId(Integer.valueOf(conversationId), pageable);
+        Page<StoryHistoryEntity> storyHistoryEntities = storyHistoryRepository.findByStoryId(conversationId, pageable);
 
         List<Message> messages = new ArrayList<>();
         for (StoryHistoryEntity storyHistoryEntity : storyHistoryEntities) {
             MessageType messageType = MessageType.fromValue(storyHistoryEntity.getMessageType());
             switch (messageType) {
                 case SYSTEM -> {
-                    Message message = new SystemMessage(storyHistoryEntity.getMessage());
+                    Message message = new SystemMessage(objectMapper.writeValueAsString(storyHistoryEntity.getMessage()));
                     messages.add(message);
                 }
                 case USER -> {
-                    Message message = new UserMessage(storyHistoryEntity.getMessage());
+                    Message message = new UserMessage(objectMapper.writeValueAsString(storyHistoryEntity.getMessage()));
                     messages.add(message);
                 }
                 case ASSISTANT -> {
-                    Message message = new AssistantMessage(storyHistoryEntity.getMessage());
+                    Message message = new AssistantMessage(objectMapper.writeValueAsString(storyHistoryEntity.getMessage()));
                     messages.add(message);
                 }
             }
