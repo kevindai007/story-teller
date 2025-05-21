@@ -26,6 +26,11 @@ public class PostgreChatMemory implements ChatMemory {
     private final ObjectMapper objectMapper;
 
     @Override
+    public void add(String conversationId, Message message) {
+        add(conversationId, List.of(message));
+    }
+
+    @Override
     public void add(String conversationId, List<Message> messages) {
         List<StoryHistoryEntity> storyHistoryEntities = new ArrayList<>();
         for (Message message : messages) {
@@ -46,8 +51,8 @@ public class PostgreChatMemory implements ChatMemory {
 
     @SneakyThrows
     @Override
-    public List<Message> get(String conversationId, int lastN) {
-        Pageable pageable = PageRequest.of(0, lastN);
+    public List<Message> get(String conversationId) {
+        Pageable pageable = PageRequest.of(0, 10);
         Page<StoryHistoryEntity> storyHistoryEntities = storyHistoryRepository.findByStoryId(conversationId, pageable);
 
         List<Message> messages = new ArrayList<>();
@@ -68,9 +73,9 @@ public class PostgreChatMemory implements ChatMemory {
                 }
             }
         }
-
         return messages;
     }
+
 
     @Override
     public void clear(String conversationId) {
