@@ -38,7 +38,8 @@ public class PostgreChatMemory implements ChatMemory {
             storyHistoryEntity.setConversationId(conversationId);
             storyHistoryEntity.setMessageType(message.getMessageType().getValue());
             JsonNode jsonNode = objectMapper.valueToTree(message);
-            storyHistoryEntity.setMessage(jsonNode);
+            String content = jsonNode.get("text").asText();
+            storyHistoryEntity.setMessage(content);
             storyHistoryEntities.add(storyHistoryEntity);
         }
         try {

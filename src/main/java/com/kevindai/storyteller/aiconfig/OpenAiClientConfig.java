@@ -3,12 +3,17 @@ package com.kevindai.storyteller.aiconfig;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.document.MetadataMode;
+import org.springframework.ai.image.ImageModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
+import org.springframework.ai.openai.OpenAiImageModel;
+import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.openai.api.OpenAiImageApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.support.RetryTemplate;
 
 @Configuration
 public class OpenAiClientConfig {
@@ -22,8 +27,20 @@ public class OpenAiClientConfig {
         OpenAiEmbeddingModel embeddingModel = new OpenAiEmbeddingModel(openAiApi);
         ChatClient.Builder builder = ChatClient.builder(chatModel);
         builder.defaultAdvisors(SimpleLoggerAdvisor.builder().build());
+
         return builder.build();
     }
+
+//    @Bean
+//    public ImageModel openAiImageModel() {
+//        OpenAiImageApi openAiImageApi = OpenAiImageApi.builder().apiKey(apiKey).build();
+//        OpenAiImageOptions imageOptions = OpenAiImageOptions.builder()
+//                .quality("hd")
+//                .N(4)
+//                .height(1024)
+//                .width(1024).build();
+//        return new OpenAiImageModel(openAiImageApi, imageOptions, RetryTemplate.defaultInstance());
+//    }
 
     @Bean
     public OpenAiEmbeddingModel openAiEmbeddingModel() {

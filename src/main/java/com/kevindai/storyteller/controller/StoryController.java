@@ -4,6 +4,7 @@ import com.kevindai.storyteller.entity.UserInfoEntity;
 import com.kevindai.storyteller.pojo.StoryItem;
 import com.kevindai.storyteller.pojo.StoryTellerDto;
 import com.kevindai.storyteller.service.PostgreChatMemory;
+import com.kevindai.storyteller.tools.ImageGenerationTools;
 import com.kevindai.storyteller.tools.UserInfoTools;
 import com.kevindai.storyteller.utils.UserHelper;
 import lombok.RequiredArgsConstructor;
@@ -11,15 +12,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.document.Document;
+import org.springframework.ai.image.ImageModel;
+import org.springframework.ai.image.ImagePrompt;
+import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.vectorstore.filter.Filter;
-import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
+import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -38,8 +39,9 @@ public class StoryController {
     private final PostgreChatMemory postgreChatMemory;
     private final UserHelper userHelper;
     private final UserInfoTools userInfoTools;
+    private final ImageGenerationTools imageGenerationTools;
     private final ChatMemory chatMemory;
-    private final VectorStore vectorStore;
+    private final ImageModel imageModel;
 
 
     @GetMapping("/story")
@@ -59,52 +61,41 @@ public class StoryController {
         return chatClient.prompt()
 //                .system(s -> StoryTypeEnum.fromType(storyTellerDto.getStoryType()))
                 .user(u -> u.text(storyTellerDto.getInput()))
-//                .advisors(MessageChatMemoryAdvisor.builder(postgreChatMemory).conversationId(storyTellerDto.getConversationId()).build())
-                .advisors(MessageChatMemoryAdvisor.builder(chatMemory).conversationId(storyTellerDto.getConversationId()).build()).tools(userInfoTools).toolContext(Map.of("id", userInfo.getId())).stream().content()
+                .advisors(MessageChatMemoryAdvisor.builder(postgreChatMemory).conversationId(storyTellerDto.getConversationId()).build())
+//                .advisors(MessageChatMemoryAdvisor.builder(chatMemory).conversationId(storyTellerDto.getConversationId()).build())
+                .tools(userInfoTools, imageGenerationTools)
+                .toolContext(Map.of("id", userInfo.getId())).stream().content()
 //                .doOnNext(chunk -> log.info("Streaming chunk: {}", chunk)) // Log each chunk
                 .map(chunk -> ServerSentEvent.<String>builder().data(chunk).build());
     }
 
-//    @PostMapping("/image-story")
-//    public String getImageStory(@RequestBody StoryTellerDto storyTellerDto) throws Exception {
-//        ImageResponse response = openaiImageModel.call(
-//                new ImagePrompt("A light cream colored mini golden doodle",
-//                        OpenAiImageOptions.builder()
-//                                .quality("hd")
-//                                .N(4)
-//                                .height(1024)
-//                                .width(1024).build())
-//
-//        );
-//    }
+    @PostMapping("/image-story")
+    public ResponseEntity<ImageResponse> getImageStory(@RequestBody StoryTellerDto storyTellerDto) throws Exception {
 
-//    @GetMapping("/function-test")
-//    public String functionTest(@RequestParam String input) {
-//        String weatherFunction1 = chatClient.prompt().user(input).function("CurrentWeather", "Get the weather in location", new WeatherService()).call().content();
-//        return weatherFunction1;
-//    }
+        ImageResponse imageResponse = imageModel.call(new ImagePrompt(storyTellerDto.getInput(), OpenAiImageOptions.builder()
+                .quality("hd")
+                .N(1)
+                .height(1024)
+                .width(1024).build()));
+        return ResponseEntity.ok(imageResponse);
+    }
 
     @GetMapping("embedding-test")
-    public String embeddingTest(@RequestParam String input) {
-//        EmbeddingResponse embeddingResponse = openAiEmbeddingModel.call(
-//                new EmbeddingRequest(List.of("Hello World", "World is big and salvation is near"),
-//                        OpenAiEmbeddingOptions.builder()
-//                                .withModel("Different-Embedding-Model-Deployment-Name")
-//                                .build()));
-//        return embedding;
+    public ResponseEntity<ImageResponse> embeddingTest(@RequestParam String input) {
+//        EmbeddingResponse embeddingResponse = openAiEmbeddingModel.call(new EmbeddingRequest("Hello World");
         return null;
     }
 
-    @GetMapping("/vector-test")
-    public String vectorTest(@RequestParam String input, @RequestParam String messageType) {
-        FilterExpressionBuilder b = new FilterExpressionBuilder();
-        Filter.Expression expression = b.eq("message_type", messageType).build();
-
-        List<Document> results = this.vectorStore.similaritySearch(SearchRequest.builder().query(input).filterExpression(expression).topK(5).build());
-        for (Document result : results) {
-            log.info("Document: {}, Metadata: {}", result.getText(), result.getMetadata());
-        }
-        return "Vector search completed. Check logs for results.";
-    }
+//    @GetMapping("/vector-test")
+//    public String vectorTest(@RequestParam String input, @RequestParam String messageType) {
+//        FilterExpressionBuilder b = new FilterExpressionBuilder();
+//        Filter.Expression expression = b.eq("message_type", messageType).build();
+//
+//        List<Document> results = this.vectorStore.similaritySearch(SearchRequest.builder().query(input).filterExpression(expression).topK(5).build());
+//        for (Document result : results) {
+//            log.info("Document: {}, Metadata: {}", result.getText(), result.getMetadata());
+//        }
+//        return "Vector search completed. Check logs for results.";
+//    }
 
 }

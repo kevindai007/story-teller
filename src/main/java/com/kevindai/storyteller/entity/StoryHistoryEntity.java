@@ -1,6 +1,5 @@
 package com.kevindai.storyteller.entity;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -28,8 +27,8 @@ public class StoryHistoryEntity {
 
     @NotNull
     @Column(name = "message", nullable = false)
-    @JdbcTypeCode(SqlTypes.JSON)
-    private JsonNode message;
+//    @JdbcTypeCode(SqlTypes.JSON)
+    private String message;
 
     @NotNull
     @Column(name = "message_type", nullable = false)
