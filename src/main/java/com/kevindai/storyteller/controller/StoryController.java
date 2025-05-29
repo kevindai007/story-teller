@@ -1,8 +1,8 @@
 package com.kevindai.storyteller.controller;
 
 import com.kevindai.storyteller.entity.UserInfoEntity;
-import com.kevindai.storyteller.pojo.StoryItem;
-import com.kevindai.storyteller.pojo.StoryTellerDto;
+import com.kevindai.storyteller.enums.StreamEventType;
+import com.kevindai.storyteller.pojo.*;
 import com.kevindai.storyteller.service.PostgreChatMemory;
 import com.kevindai.storyteller.tools.ImageGenerationTools;
 import com.kevindai.storyteller.tools.UserInfoTools;
@@ -27,6 +27,8 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -55,18 +57,28 @@ public class StoryController {
 
 
     @PostMapping(value = "/stream-story", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> streamStory(@RequestBody StoryTellerDto storyTellerDto) {
+    public Flux<ServerSentEvent<StreamResponse>> streamStory(@RequestBody StoryTellerDto storyTellerDto) {
         UserInfoEntity userInfo = userHelper.getUserInfo();
+        String streamId = UUID.randomUUID().toString();
+        AtomicInteger chunkIndex = new AtomicInteger(0);
 
-        return chatClient.prompt()
-//                .system(s -> StoryTypeEnum.fromType(storyTellerDto.getStoryType()))
-                .user(u -> u.text(storyTellerDto.getInput()))
-                .advisors(MessageChatMemoryAdvisor.builder(postgreChatMemory).conversationId(storyTellerDto.getConversationId()).build())
-//                .advisors(MessageChatMemoryAdvisor.builder(chatMemory).conversationId(storyTellerDto.getConversationId()).build())
-                .tools(userInfoTools, imageGenerationTools)
-                .toolContext(Map.of("id", userInfo.getId())).stream().content()
-//                .doOnNext(chunk -> log.info("Streaming chunk: {}", chunk)) // Log each chunk
-                .map(chunk -> ServerSentEvent.<String>builder().data(chunk).build());
+        return Flux.concat(
+                // Start event
+                Flux.just(createStreamStartEvent(storyTellerDto.getConversationId(), streamId)),
+
+                // Content stream
+                chatClient.prompt()
+                        //.system(s -> StoryTypeEnum.fromType(storyTellerDto.getStoryType()))
+                        .user(u -> u.text(storyTellerDto.getInput()))
+                        .advisors(MessageChatMemoryAdvisor.builder(postgreChatMemory).conversationId(storyTellerDto.getConversationId()).build())
+                        .tools(userInfoTools, imageGenerationTools)
+                        .toolContext(Map.of("id", userInfo.getId()))
+                        .stream().content()
+                        .map(chunk -> createContentDeltaEvent(chunk, streamId, chunkIndex.getAndIncrement())),
+
+                // End event
+                Flux.just(createStreamEndEvent(streamId))
+        );
     }
 
     @PostMapping("/image-story")
@@ -97,5 +109,32 @@ public class StoryController {
 //        }
 //        return "Vector search completed. Check logs for results.";
 //    }
+
+    private ServerSentEvent<StreamResponse> createStreamStartEvent(String conversationId, String streamId) {
+        StreamStart startData = new StreamStart(conversationId, "spring-ai");
+        StreamResponse response = new StreamResponse(StreamEventType.STREAM_START.getEventName(), streamId, startData);
+        return ServerSentEvent.<StreamResponse>builder()
+                .event(StreamEventType.STREAM_START.getEventName())
+                .data(response)
+                .build();
+    }
+
+    private ServerSentEvent<StreamResponse> createContentDeltaEvent(String chunk, String streamId, int index) {
+        ContentDelta deltaData = new ContentDelta(chunk, index);
+        StreamResponse response = new StreamResponse(StreamEventType.CONTENT_DELTA.getEventName(), streamId, deltaData);
+        return ServerSentEvent.<StreamResponse>builder()
+                .event(StreamEventType.CONTENT_DELTA.getEventName())
+                .data(response)
+                .build();
+    }
+
+    private ServerSentEvent<StreamResponse> createStreamEndEvent(String streamId) {
+        StreamEnd endData = new StreamEnd(new UsageInfo(0, 0));
+        StreamResponse response = new StreamResponse(StreamEventType.STREAM_END.getEventName(), streamId, endData);
+        return ServerSentEvent.<StreamResponse>builder()
+                .event(StreamEventType.STREAM_END.getEventName())
+                .data(response)
+                .build();
+    }
 
 }
