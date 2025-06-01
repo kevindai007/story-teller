@@ -158,3 +158,207 @@ export const throttle = (func, limit) => {
     }
   };
 };
+
+/**
+ * Parse markdown content and convert to JSX elements
+ * @param {string} content - Markdown content to parse
+ * @returns {Array} Array of JSX elements
+ */
+export const parseMarkdownContent = (content) => {
+  if (!content) return [];
+  
+  const elements = [];
+  const lines = content.split('\n');
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    let processedLine = line;
+    const lineElements = [];
+    let lastIndex = 0;
+    
+    // First, check for markdown image pattern: ![alt text](url)
+    const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    let match;
+    
+    while ((match = imageRegex.exec(processedLine)) !== null) {
+      // Add any text before the image
+      if (match.index > lastIndex) {
+        const textBefore = processedLine.substring(lastIndex, match.index);
+        if (textBefore.trim()) {
+          lineElements.push(textBefore);
+        }
+      }
+      
+      // Add the image element
+      const altText = match[1] || 'Image';
+      const imageUrl = match[2];
+      
+      lineElements.push({
+        type: 'image',
+        alt: altText,
+        src: imageUrl,
+        key: `img-${i}-${match.index}`
+      });
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // If no markdown images found, check for regular links that might be images
+    if (lineElements.length === 0) {
+      const linkRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
+      lastIndex = 0;
+      
+      while ((match = linkRegex.exec(processedLine)) !== null) {
+        // Add any text before the link
+        if (match.index > lastIndex) {
+          const textBefore = processedLine.substring(lastIndex, match.index);
+          if (textBefore.trim()) {
+            lineElements.push(textBefore);
+          }
+        }
+        
+        const linkText = match[1];
+        const linkUrl = match[2];
+        
+        // Check if the URL appears to be an image
+        if (isValidImageUrl(linkUrl)) {
+          // Convert link to image
+          lineElements.push({
+            type: 'image',
+            alt: linkText || 'Image',
+            src: linkUrl,
+            key: `img-link-${i}-${match.index}`
+          });
+        } else {
+          // Keep as regular link
+          lineElements.push({
+            type: 'link',
+            text: linkText,
+            url: linkUrl,
+            key: `link-${i}-${match.index}`
+          });
+        }
+        
+        lastIndex = match.index + match[0].length;
+      }
+    }
+    
+    // Add any remaining text after the last match
+    if (lastIndex < processedLine.length) {
+      const textAfter = processedLine.substring(lastIndex);
+      if (textAfter.trim()) {
+        lineElements.push(textAfter);
+      }
+    }
+    
+    // If no images or links were found, just add the line as text
+    if (lineElements.length === 0 && processedLine.trim()) {
+      lineElements.push(processedLine);
+    }
+    
+    // Add line elements to the main elements array
+    if (lineElements.length > 0) {
+      elements.push({
+        type: 'line',
+        content: lineElements,
+        key: `line-${i}`
+      });
+    } else if (processedLine.trim() === '') {
+      // Preserve empty lines for spacing
+      elements.push({
+        type: 'line',
+        content: [''],
+        key: `line-${i}`
+      });
+    }
+  }
+  
+  return elements;
+};
+
+/**
+ * Check if a URL is a valid image URL
+ * @param {string} url - URL to check
+ * @returns {boolean} True if URL appears to be an image
+ */
+export const isValidImageUrl = (url) => {
+  if (!url || typeof url !== 'string') return false;
+  
+  // Check for common image extensions
+  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)(\?.*)?$/i;
+  if (imageExtensions.test(url)) return true;
+  
+  // Check for common image hosting domains
+  const imageHosts = [
+    'imgur.com',
+    'i.imgur.com',
+    'cdn.discordapp.com',
+    'media.discordapp.net',
+    'images.unsplash.com',
+    'pixabay.com',
+    'pexels.com',
+    'blob.core.windows.net',  // Azure Blob Storage
+    'amazonaws.com',          // Amazon S3
+    'googleusercontent.com',  // Google Storage
+    'oaidalleapiprodscus.blob.core.windows.net', // OpenAI DALL-E images
+    'cdn.openai.com',
+    'files.openai.com'
+  ];
+  
+  try {
+    const urlObj = new URL(url);
+    
+    // Check if hostname matches any image hosting service
+    const isImageHost = imageHosts.some(host => urlObj.hostname.includes(host));
+    if (isImageHost) return true;
+    
+    // Additional checks for Azure Blob Storage URLs with image-like paths
+    if (urlObj.hostname.includes('blob.core.windows.net')) {
+      return true; // Assume Azure blob storage URLs are images in this context
+    }
+    
+    // Check URL path for image indicators
+    const pathLower = urlObj.pathname.toLowerCase();
+    if (pathLower.includes('/img') || pathLower.includes('/image') || pathLower.includes('/photo')) {
+      return true;
+    }
+    
+    // Check query parameters for image indicators
+    const searchParams = urlObj.searchParams;
+    if (searchParams.has('rsct') && searchParams.get('rsct').includes('image')) {
+      return true;
+    }
+    
+    return false;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Extract all image URLs from markdown content
+ * @param {string} content - Markdown content
+ * @returns {Array} Array of image objects with alt text and URLs
+ */
+export const extractImagesFromMarkdown = (content) => {
+  if (!content) return [];
+  
+  const images = [];
+  const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+  let match;
+  
+  while ((match = imageRegex.exec(content)) !== null) {
+    const altText = match[1] || 'Image';
+    const imageUrl = match[2];
+    
+    if (isValidImageUrl(imageUrl)) {
+      images.push({
+        alt: altText,
+        src: imageUrl,
+        markdown: match[0]
+      });
+    }
+  }
+  
+  return images;
+};

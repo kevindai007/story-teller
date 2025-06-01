@@ -16,18 +16,18 @@ app.use(express.json());
 const storyTemplates = {
   horror: [
     "In the dead of night, shadows began to move on their own...",
-    "The old mansion creaked as footsteps echoed from empty rooms...",
+    "The old mansion creaked as footsteps echoed from empty rooms...\n\n![Haunted mansion](https://images.unsplash.com/photo-1520637836862-4d197d17c50a?w=400)",
     "Her reflection showed something that wasn't there...",
     "The whispers grew louder as the candle flickered out..."
   ],
   fantasy: [
-    "The dragon's eyes gleamed like emeralds in the moonlight...",
+    "The dragon's eyes gleamed like emeralds in the moonlight...\n\n![Dragon](https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400)",
     "Magic sparkled through the enchanted forest...",
     "The wizard's staff pulsed with ancient power...",
     "Fairies danced around the mystical portal..."
   ],
   'sci-fi': [
-    "The spaceship's engines hummed as they approached the unknown planet...",
+    "The spaceship's engines hummed as they approached the unknown planet...\n\n![Spaceship](https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=400)",
     "Artificial intelligence had evolved beyond human comprehension...",
     "Time travel was possible, but the consequences were dire...",
     "The alien technology defied all known physics..."
@@ -35,11 +35,11 @@ const storyTemplates = {
   romance: [
     "Their eyes met across the crowded ballroom...",
     "The letter arrived fifty years too late...",
-    "Love found them in the most unexpected place...",
+    "Love found them in the most unexpected place...\n\n![Romantic sunset](https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400)",
     "The promise ring sparkled in the sunset..."
   ],
   adventure: [
-    "The treasure map led to an uncharted island...",
+    "The treasure map led to an uncharted island...\n\n![Treasure map](https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400)",
     "Through dense jungle and treacherous rapids...",
     "The mountain peak held secrets of the ancient civilization...",
     "With sword in hand, the hero faced the unknown..."
