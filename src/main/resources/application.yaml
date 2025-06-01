@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: story-teller
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=true&serverTimezone=UTC
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jooq:
+    sql-dialect: POSTGRES
+  # data:
+  #   redis:
+  #     url: redis://${REDIS_HOST}:${REDIS_PORT}
+  ai:
+    vectorstore:
+      # milvus:
+      #   client:
+      #     host: localhost
+      #     port: 19530
+      #     username: root
+      #     password: milvus
+      #   databaseName: default
+      #   collectionName: vector_store
+      #   embeddingDimension: 1536
+      #   indexType: IVF_FLAT
+      #   metricType: COSINE
+      redis:
+        initialize-schema: true
+        index-name: story-teller-vector-index
+        prefix: st
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: ALWAYS
+    # OpenAI Image key
+    azure:
+      openai:
+        api-key: ${SPRING_AI_OPENAI_API_KEY}
+logging:
+  level:
+    org:
+      springframework:
+        ai:
+          chat:
+            client:
+              advisor: DEBUG
+#OpenAI chat model key
+openai:
+  api:
+    key: ${SPRING_AI_OPENAI_API_KEY}
