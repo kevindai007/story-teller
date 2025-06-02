@@ -1,0 +1,6 @@
+name = "story-teller"
+pages_build_output_dir = "./build"
+compatibility_date = "2023-12-01"
+
+[env.production]
+name = "story-teller"
