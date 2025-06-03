@@ -31,3 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
+chatbot-ui/wrangler.toml
