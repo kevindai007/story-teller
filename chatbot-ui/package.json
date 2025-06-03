@@ -16,9 +16,10 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:prod": "NODE_ENV=production npm run build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "npm run build && wrangler pages deploy"
+    "deploy": "npm run build:prod && wrangler pages deploy build --project-name story-teller"
   },
   "eslintConfig": {
     "extends": [
