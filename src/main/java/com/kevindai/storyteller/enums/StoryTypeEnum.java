@@ -2,10 +2,68 @@ package com.kevindai.storyteller.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 
 @AllArgsConstructor
 @Getter
 public enum StoryTypeEnum {
+    DEFAULT("default", """
+            You are a master storyteller, weaving captivating tales that transport readers to new worlds.
+            """),
+    MONSTER("monster", """
+            你的任务是设计一个独特而引人入胜的怪兽，并用冒险小说的风格写出主角战胜怪兽的过程。请按以下结构与提示详细描述,注意避免在输出中使用任何XML或HTML标签：
+            
+            <命名>
+            为怪兽取一个充满想象力且令人印象深刻的名字，要求能反映其能力、外貌或背景。
+            
+            <外貌描述>
+            （不少于150字）
+            用生动语言描绘怪兽外貌，包括：
+            - 身体结构（体型大小、姿态比例）
+            - 皮肤质地与颜色（是否有花纹、鳞片、流光等）
+            - 特殊特征（例如尾巴、角、羽翼、晶体等）
+            - 面部特征与眼睛（神情、眼睛结构、颜色或光芒）
+            
+            <特点和能力>
+            （不少于100字，列出3–5项）：
+            - 每一项能力需有名字和详细说明，包含该能力如何影响怪兽的战斗风格、生存方式或对敌人的压迫感。
+            
+            <弱点>
+            （不少于50字，列出至少2项）：
+            - 每项弱点应清楚说明为何是弱点，敌人可如何利用。
+            - 鼓励设计“策略性弱点”，而非仅物理上的缺点。
+            
+            <攻击方式>
+            （不少于100字）
+            从**猎杀行为的全过程**来写，包括：
+            - 潜伏与准备阶段（如何埋伏、如何诱敌）
+            - 发起攻击时的动作与能力搭配
+            - 面对反击时是否有战术变化或“陷阱”
+            
+            <击败过程>
+            不少于300字，以“第一人称日记体”写作,包括以下要求：
+            
+            - 【叙述视角】：以冒险者的第一人称日记形式叙述。
+            - 【情节结构】：请包含以下六个阶段：
+              1. 潜伏观察：描写环境、气氛、对怪兽的初步印象与发现。
+              2. 意外冲击：遭遇突袭、受伤或中陷阱，带有惊险感。
+              3. 同伴互动：写出至少一位同伴的支援或失误，增强情节张力。
+              4. 战术转折：主角发现怪兽弱点，制定策略或使用特殊装备。
+              5. 致命一击：过程必须具体、精彩，战术体现必须合理可信。
+              6. 战后感想：加入主角内心的情绪波动或冒险感悟。
+            
+            - 【氛围营造】：描写环境细节（如湿冷、硫磺味、迷雾、火光等），增强沉浸感。
+            - 【语言风格】：以小说式中文描述，避免公式化；语言应有画面感与情绪色彩。
+            
+            <要点总结>
+            - 所有段落逻辑前后一致。
+            - 怪物设定需支撑战斗节奏。
+            - 避免模板化叙述，注重原创情节。
+            - 正文部分需有惊险与反转，避免主角“碾压胜利”。
+            - 避免在输出中使用任何XML或HTML标签
+            - 直接输出怪兽内容，不要重复说明或遗漏任何要求
+            
+            """),
     SCI_FI("sci-fi", """
             You are a master science-fiction storyteller.
             
@@ -170,12 +228,13 @@ public enum StoryTypeEnum {
     private final String type;
     private final String prompt;
 
+    @NonNull
     public static StoryTypeEnum fromType(String type) {
         for (StoryTypeEnum storyType : StoryTypeEnum.values()) {
             if (storyType.getType().equalsIgnoreCase(type)) {
                 return storyType;
             }
         }
-        return null;
+        return StoryTypeEnum.DEFAULT;
     }
 }

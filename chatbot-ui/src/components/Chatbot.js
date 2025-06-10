@@ -11,7 +11,7 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState(() => uuidv4());
-  const [storyType, setStoryType] = useState('horror');
+  const [storyType, setStoryType] = useState('monster');
   const [error, setError] = useState(null);
   const abortControllerRef = useRef(null);
 

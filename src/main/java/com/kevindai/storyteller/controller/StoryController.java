@@ -1,6 +1,7 @@
 package com.kevindai.storyteller.controller;
 
 import com.kevindai.storyteller.entity.UserInfoEntity;
+import com.kevindai.storyteller.enums.StoryTypeEnum;
 import com.kevindai.storyteller.enums.StreamEventType;
 import com.kevindai.storyteller.pojo.*;
 import com.kevindai.storyteller.service.PostgreChatMemory;
@@ -62,16 +63,19 @@ public class StoryController {
         String streamId = UUID.randomUUID().toString();
         AtomicInteger chunkIndex = new AtomicInteger(0);
 
+        StoryTypeEnum storyTypeEnum = StoryTypeEnum.fromType(storyTellerDto.getStoryType());
+        String systemPrompt = storyTypeEnum.getPrompt();
+
         return Flux.concat(
                 // Start event
                 Flux.just(createStreamStartEvent(storyTellerDto.getConversationId(), streamId)),
-
                 // Content stream
                 chatClient.prompt()
-                        //.system(s -> StoryTypeEnum.fromType(storyTellerDto.getStoryType()))
+                        .system(systemPrompt)
                         .user(u -> u.text(storyTellerDto.getInput()))
                         .advisors(MessageChatMemoryAdvisor.builder(postgreChatMemory).conversationId(storyTellerDto.getConversationId()).build())
-                        .tools(userInfoTools, imageGenerationTools)
+//                        .tools(userInfoTools, imageGenerationTools)
+                        .tools(userInfoTools)
                         .toolContext(Map.of("id", userInfo.getId()))
                         .stream().content()
                         .map(chunk -> createContentDeltaEvent(chunk, streamId, chunkIndex.getAndIncrement())),

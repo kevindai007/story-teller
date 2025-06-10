@@ -8,6 +8,12 @@ export const MESSAGE_TYPES = {
 // Story types configuration
 export const STORY_TYPES = [
   { 
+    value: 'monster', 
+    label: '👹 Monster', 
+    description: 'Stories featuring cool and terrifying monsters',
+    color: '#742a2a'
+  },
+  { 
     value: 'horror', 
     label: '🎃 Horror', 
     description: 'Scary and spooky stories',
