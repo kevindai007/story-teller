@@ -74,8 +74,8 @@ public class StoryController {
                         .system(systemPrompt)
                         .user(u -> u.text(storyTellerDto.getInput()))
                         .advisors(MessageChatMemoryAdvisor.builder(postgreChatMemory).conversationId(storyTellerDto.getConversationId()).build())
-//                        .tools(userInfoTools, imageGenerationTools)
-                        .tools(userInfoTools)
+                        .tools(userInfoTools, imageGenerationTools)
+//                        .tools(userInfoTools)
                         .toolContext(Map.of("id", userInfo.getId()))
                         .stream().content()
                         .map(chunk -> createContentDeltaEvent(chunk, streamId, chunkIndex.getAndIncrement())),
