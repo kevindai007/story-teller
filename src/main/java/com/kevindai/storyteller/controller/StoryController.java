@@ -38,7 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RestController
 public class StoryController {
     @Resource
-    @Qualifier("vertexAiChatClient")
+//    @Qualifier("vertexAiChatClient")
+    @Qualifier("openAiChatClient")
     private ChatClient chatClient;
     private final OpenAiEmbeddingModel openAiEmbeddingModel;
     @Value("${openai.api.key}")
@@ -78,8 +79,8 @@ public class StoryController {
                         .system(systemPrompt)
                         .user(u -> u.text(storyTellerDto.getInput()))
                         .advisors(MessageChatMemoryAdvisor.builder(postgreChatMemory).conversationId(storyTellerDto.getConversationId()).build())
-//                        .tools(userInfoTools, imageGenerationTools)
-                        .tools(userInfoTools)
+                        .tools(userInfoTools, imageGenerationTools)
+//                        .tools(userInfoTools)
                         .toolContext(Map.of("id", userInfo.getId()))
                         .stream().content()
                         .map(chunk -> createContentDeltaEvent(chunk, streamId, chunkIndex.getAndIncrement())),
