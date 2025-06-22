@@ -1,13 +1,11 @@
 package com.kevindai.storyteller.aiconfig;
 
-import com.google.cloud.vertexai.VertexAI;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,17 +26,17 @@ public class OpenAiClientConfig {
         return builder.build();
     }
 
-    @Bean(name = "vertexAiChatClient")
-    public ChatClient chatClient() {
-        VertexAI vertexAI = new VertexAI.Builder()
-                .setProjectId("gen-lang-client-0097599786")
-                .setLocation("us-central1")
-                .build();
-        VertexAiGeminiChatModel chatModel = VertexAiGeminiChatModel.builder().vertexAI(vertexAI).build();
-        ChatClient.Builder builder = ChatClient.builder(chatModel);
-        builder.defaultAdvisors(SimpleLoggerAdvisor.builder().build());
-        return builder.build();
-    }
+//    @Bean(name = "vertexAiChatClient")
+//    public ChatClient chatClient() {
+//        VertexAI vertexAI = new VertexAI.Builder()
+//                .setProjectId("gen-lang-client-0097599786")
+//                .setLocation("us-central1")
+//                .build();
+//        VertexAiGeminiChatModel chatModel = VertexAiGeminiChatModel.builder().vertexAI(vertexAI).build();
+//        ChatClient.Builder builder = ChatClient.builder(chatModel);
+//        builder.defaultAdvisors(SimpleLoggerAdvisor.builder().build());
+//        return builder.build();
+//    }
 
 //    @Bean
 //    public ImageModel openAiImageModel() {
