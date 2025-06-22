@@ -8,6 +8,7 @@ import com.kevindai.storyteller.service.PostgreChatMemory;
 import com.kevindai.storyteller.tools.ImageGenerationTools;
 import com.kevindai.storyteller.tools.UserInfoTools;
 import com.kevindai.storyteller.utils.UserHelper;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -18,6 +19,7 @@ import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.openai.OpenAiImageOptions;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -35,7 +37,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 @RestController
 public class StoryController {
-    private final ChatClient chatClient;
+    @Resource
+    @Qualifier("vertexAiChatClient")
+    private ChatClient chatClient;
     private final OpenAiEmbeddingModel openAiEmbeddingModel;
     @Value("${openai.api.key}")
     private String apiKey;
@@ -74,8 +78,8 @@ public class StoryController {
                         .system(systemPrompt)
                         .user(u -> u.text(storyTellerDto.getInput()))
                         .advisors(MessageChatMemoryAdvisor.builder(postgreChatMemory).conversationId(storyTellerDto.getConversationId()).build())
-                        .tools(userInfoTools, imageGenerationTools)
-//                        .tools(userInfoTools)
+//                        .tools(userInfoTools, imageGenerationTools)
+                        .tools(userInfoTools)
                         .toolContext(Map.of("id", userInfo.getId()))
                         .stream().content()
                         .map(chunk -> createContentDeltaEvent(chunk, streamId, chunkIndex.getAndIncrement())),

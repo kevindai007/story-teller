@@ -547,6 +547,7 @@
   color: #667eea;
   text-decoration: underline;
   transition: color 0.2s ease;
+  word-break: break-word;
 }
 
 .message-link:hover {
@@ -651,5 +652,283 @@
   
   .message-textarea::placeholder {
     color: #718096;
+  }
+}
+
+/* Markdown Styling */
+.text-content {
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+/* Markdown Headings */
+.markdown-heading {
+  margin: 1rem 0 0.5rem 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.markdown-h1 {
+  font-size: 1.5rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 0.25rem;
+}
+
+.markdown-h2 {
+  font-size: 1.3rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 0.25rem;
+}
+
+.markdown-h3 {
+  font-size: 1.1rem;
+}
+
+.markdown-h4 {
+  font-size: 1rem;
+}
+
+.markdown-h5 {
+  font-size: 0.9rem;
+}
+
+.markdown-h6 {
+  font-size: 0.8rem;
+}
+
+.user .markdown-h1,
+.user .markdown-h2 {
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Markdown Paragraphs */
+.markdown-paragraph {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.markdown-paragraph:first-child {
+  margin-top: 0;
+}
+
+.markdown-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Markdown Lists */
+.markdown-list {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.markdown-list li {
+  margin: 0.25rem 0;
+  line-height: 1.5;
+}
+
+.markdown-list ul,
+.markdown-list ol {
+  margin: 0.25rem 0;
+}
+
+/* Markdown Code */
+.inline-code {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.85em;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.user .inline-code {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.code-block {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  overflow-x: auto;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.user .code-block {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.code-block code {
+  background: none;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+}
+
+/* Markdown Blockquotes */
+.markdown-blockquote {
+  border-left: 4px solid #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  margin: 0.5rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+}
+
+.user .markdown-blockquote {
+  border-left-color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.markdown-blockquote p {
+  margin: 0;
+}
+
+/* Markdown Tables */
+.table-container {
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.markdown-table {
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.user .markdown-table {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.table-header {
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  text-align: left;
+}
+
+.user .table-header {
+  background: rgba(255, 255, 255, 0.15);
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+.table-cell {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.user .table-cell {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.table-cell:not(:last-child),
+.table-header:not(:last-child) {
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.user .table-cell:not(:last-child),
+.user .table-header:not(:last-child) {
+  border-right-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Markdown Emphasis */
+.markdown-bold {
+  font-weight: 600;
+}
+
+.markdown-italic {
+  font-style: italic;
+}
+
+/* Enhanced Message Links for Markdown */
+.message-link {
+  color: #667eea;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+  word-break: break-word;
+}
+
+.message-link:hover {
+  color: #764ba2;
+  text-decoration: none;
+}
+
+.user .message-link {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.user .message-link:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Horizontal Rules */
+hr {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 1rem 0;
+}
+
+.user hr {
+  border-top-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Task Lists (GitHub Flavored Markdown) */
+.markdown-list input[type="checkbox"] {
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+
+/* Strikethrough */
+del {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Dark mode markdown adjustments */
+@media (prefers-color-scheme: dark) {
+  .inline-code {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+  }
+  
+  .code-block {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+  }
+  
+  .markdown-blockquote {
+    background: rgba(102, 126, 234, 0.2);
+    border-left-color: #667eea;
+  }
+  
+  .table-header {
+    background: rgba(102, 126, 234, 0.2);
+  }
+  
+  .markdown-table {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .table-cell {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .markdown-h1,
+  .markdown-h2 {
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  hr {
+    border-top-color: rgba(255, 255, 255, 0.2);
   }
 }

@@ -37,6 +37,16 @@ spring:
     azure:
       openai:
         api-key: ${SPRING_AI_OPENAI_API_KEY}
+
+    vertex:
+      ai:
+        gemini:
+          chat:
+            options:
+              model: gemini-2.5-flash-preview-04-17
+          project-id: ${SPRING_AI_VERTEX_AI_PROJECT_ID}
+          location: us-central1
+          transport: rest
 logging:
   level:
     org:
@@ -49,3 +59,4 @@ logging:
 openai:
   api:
     key: ${SPRING_AI_OPENAI_API_KEY}
+
