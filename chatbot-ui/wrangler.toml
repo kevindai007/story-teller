@@ -4,3 +4,4 @@ compatibility_date = "2023-12-01"
 
 [env.production]
 name = "story-teller"
+vars = { REACT_APP_API_BASE_URL = "https://app.kevinonline.org", REACT_APP_DEBUG = "false", REACT_APP_ENABLE_ANALYTICS = "true", REACT_APP_ERROR_REPORTING_URL = "", REACT_APP_MAX_MESSAGE_LENGTH = "1000", REACT_APP_REQUEST_TIMEOUT = "30000" }
