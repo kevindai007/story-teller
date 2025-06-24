@@ -1,4 +1,4 @@
-name: Build and Publish Docker Image
+name: Build, Publish & Deploy Docker Image
 
 on:
   push:
@@ -7,25 +7,45 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      image: ghcr.io/${{ github.repository }}/story-teller:latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
+
       - name: Build with Maven
         run: mvn -B package -Dmaven.test.skip=true --file pom.xml
+
       - name: Log in to GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker image
+
+      - name: Build & push Docker image
         uses: docker/build-push-action@v4
+        id: publish
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}/story-teller:latest
+          tags: ${{ steps.publish.outputs.image }}
 
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: oracle-node1
+    steps:
+      - name: Deploy to oracle-node1 via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host:      ${{ secrets.PROD_HOST }}
+          username:  ${{ secrets.PROD_USER }}
+          key:       ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            ~/start-story-teller.sh
