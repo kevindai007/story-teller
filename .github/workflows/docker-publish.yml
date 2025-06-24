@@ -7,8 +7,6 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    outputs:
-      image: ghcr.io/${{ github.repository }}/story-teller:latest
     steps:
       - uses: actions/checkout@v3
 
@@ -30,22 +28,25 @@ jobs:
 
       - name: Build & push Docker image
         uses: docker/build-push-action@v4
-        id: publish
         with:
           context: .
           push: true
-          tags: ${{ steps.publish.outputs.image }}
+          # ← this must be non‐empty!
+          tags: |
+            ghcr.io/${{ github.repository }}/story-teller:latest
 
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    environment: oracle-node1
+    environment: oracle-node1   # picks up PROD_HOST, PROD_USER, PROD_SSH_KEY
     steps:
-      - name: Deploy to oracle-node1 via SSH
+      - name: SSH & start story-teller
         uses: appleboy/ssh-action@v0.1.7
         with:
           host:      ${{ secrets.PROD_HOST }}
           username:  ${{ secrets.PROD_USER }}
           key:       ${{ secrets.PROD_SSH_KEY }}
           script: |
-            ~/start-story-teller.sh
+            cd ~
+            chmod +x start-story-teller.sh
+            ./start-story-teller.sh
