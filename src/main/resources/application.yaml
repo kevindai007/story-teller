@@ -38,15 +38,16 @@ spring:
       openai:
         api-key: ${SPRING_AI_OPENAI_API_KEY}
 
-    vertex:
-      ai:
-        gemini:
-          chat:
-            options:
-              model: gemini-2.5-flash-preview-04-17
-          project-id: ${SPRING_AI_VERTEX_AI_PROJECT_ID}
-          location: us-central1
-          transport: rest
+#    vertex:
+#      ai:
+#        gemini:
+#          chat:
+#            options:
+#              model: gemini-2.5-flash-preview-04-17
+#          project-id: ${SPRING_AI_VERTEX_AI_PROJECT_ID}
+#          location: us-central1
+#          transport: rest
+#          credentials-uri: file:google/gen-lang-client-0097599786-4802d8de4161.json
 logging:
   level:
     org:
@@ -59,4 +60,9 @@ logging:
 openai:
   api:
     key: ${SPRING_AI_OPENAI_API_KEY}
+
+#Google AI key for Gemini
+google:
+  ai:
+    key: ${GOOGLE_AI_KEY}
 

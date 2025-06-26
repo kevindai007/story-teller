@@ -9,7 +9,6 @@ import com.kevindai.storyteller.tools.ImageGenerationTools;
 import com.kevindai.storyteller.tools.UserInfoTools;
 import com.kevindai.storyteller.utils.UserHelper;
 import jakarta.annotation.Resource;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -34,22 +33,28 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
-@RequiredArgsConstructor
 @RestController
 public class StoryController {
     @Resource
 //    @Qualifier("vertexAiChatClient")
     @Qualifier("openAiChatClient")
     private ChatClient chatClient;
-    private final OpenAiEmbeddingModel openAiEmbeddingModel;
+    @Resource
+    private OpenAiEmbeddingModel openAiEmbeddingModel;
     @Value("${openai.api.key}")
     private String apiKey;
-    private final PostgreChatMemory postgreChatMemory;
-    private final UserHelper userHelper;
-    private final UserInfoTools userInfoTools;
-    private final ImageGenerationTools imageGenerationTools;
-    private final ChatMemory chatMemory;
-    private final ImageModel imageModel;
+    @Resource
+    private PostgreChatMemory postgreChatMemory;
+    @Resource
+    private UserHelper userHelper;
+    @Resource
+    private UserInfoTools userInfoTools;
+    @Resource
+    private ImageGenerationTools imageGenerationTools;
+    @Resource
+    private ChatMemory chatMemory;
+    @Qualifier("openAiImageModel")
+    private ImageModel imageModel;
 
 
     @GetMapping("/story")

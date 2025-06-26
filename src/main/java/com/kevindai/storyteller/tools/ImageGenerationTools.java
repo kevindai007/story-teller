@@ -2,6 +2,7 @@ package com.kevindai.storyteller.tools;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kevindai.storyteller.model.gemini.GeminiOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -12,14 +13,23 @@ import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
 @Slf4j
 @Component
 public class ImageGenerationTools {
-    private final ImageModel imageModel;
+    private final ImageModel openAiImageModel;
+    private final ImageModel geminiImageModel;
     private final ObjectMapper objectMapper;
+    
+    public ImageGenerationTools(@Qualifier("openAiImageModel") ImageModel openAiImageModel,
+                               @Qualifier("geminiImageModel") ImageModel geminiImageModel,
+                               ObjectMapper objectMapper) {
+        this.openAiImageModel = openAiImageModel;
+        this.geminiImageModel = geminiImageModel;
+        this.objectMapper = objectMapper;
+    }
 
 //    public static final String monsterImageGenerationPrompt = """
 //            Create a collectible monster trading card illustration in the style of Pokémon TCG, featuring the monster %s.
@@ -51,10 +61,9 @@ public class ImageGenerationTools {
             """;
 
     @SneakyThrows
-    @Tool(description = "generate a monster image based on the input prompt, returns the image URL")
-//    ImageGenerationTools.ImageGenerationRecord imageGeneration(@ToolParam(description = "The prompt of image generation") MonsterDescription monsterDescription, ToolContext toolContext) {
-    ImageGenerationTools.ImageGenerationRecord imageGeneration(MonsterDescription monsterDescription, ToolContext toolContext) {
-        ImageResponse imageResponse = imageModel.call(new ImagePrompt(monsterDescription.toPrompt(), OpenAiImageOptions.builder()
+    @Tool(description = "generate a monster image using OpenAI DALL-E based on the input prompt, returns the image URL")
+    ImageGenerationTools.ImageGenerationRecord openAiImageGeneration(MonsterDescription monsterDescription, ToolContext toolContext) {
+        ImageResponse imageResponse = openAiImageModel.call(new ImagePrompt(monsterDescription.toPrompt(), OpenAiImageOptions.builder()
                 .quality("hd")
                 .N(1)
                 .height(1024)
@@ -62,6 +71,26 @@ public class ImageGenerationTools {
         JsonNode jsonNode = objectMapper.readValue(objectMapper.writeValueAsString(imageResponse.getResult().getMetadata()), JsonNode.class);
         String revisedPrompt = jsonNode.get("revisedPrompt").asText();
         return new ImageGenerationRecord(revisedPrompt, imageResponse.getResult().getOutput().getUrl());
+    }
+    
+    @SneakyThrows
+    @Tool(description = "generate a monster image using Google Gemini based on the input prompt, returns the image URL")
+    ImageGenerationTools.ImageGenerationRecord geminiImageGeneration(MonsterDescription monsterDescription, ToolContext toolContext) {
+        ImageResponse imageResponse = geminiImageModel.call(new ImagePrompt(monsterDescription.toPrompt(), GeminiOptions.getImageDefault()));
+        
+        if (imageResponse.getResults().isEmpty()) {
+            log.warn("No image generated from Gemini");
+            return new ImageGenerationRecord(monsterDescription.toPrompt(), "");
+        }
+        
+        String imageUrl = imageResponse.getResult().getOutput().getUrl();
+        return new ImageGenerationRecord(monsterDescription.toPrompt(), imageUrl);
+    }
+    
+    @SneakyThrows
+    @Tool(description = "generate a monster image based on the input prompt, returns the image URL (uses OpenAI by default)")
+    ImageGenerationTools.ImageGenerationRecord imageGeneration(MonsterDescription monsterDescription, ToolContext toolContext) {
+        return openAiImageGeneration(monsterDescription, toolContext);
     }
 
     public record ImageGenerationRecord(String revisedPrompt, String imageUrl) {

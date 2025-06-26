@@ -38,17 +38,6 @@ public class OpenAiClientConfig {
 //        return builder.build();
 //    }
 
-//    @Bean
-//    public ImageModel openAiImageModel() {
-//        OpenAiImageApi openAiImageApi = OpenAiImageApi.builder().apiKey(apiKey).build();
-//        OpenAiImageOptions imageOptions = OpenAiImageOptions.builder()
-//                .quality("hd")
-//                .N(4)
-//                .height(1024)
-//                .width(1024).build();
-//        return new OpenAiImageModel(openAiImageApi, imageOptions, RetryTemplate.defaultInstance());
-//    }
-
     @Bean
     public OpenAiEmbeddingModel openAiEmbeddingModel() {
         OpenAiApi openAiApi = OpenAiApi.builder().apiKey(apiKey).build();
