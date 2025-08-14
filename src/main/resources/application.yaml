@@ -37,6 +37,13 @@ spring:
     azure:
       openai:
         api-key: ${SPRING_AI_OPENAI_API_KEY}
+    mcp:
+      client:
+        sse:
+          connections:
+            task_management:
+              url: http://localhost:8081/sse
+
 
 #    vertex:
 #      ai:
@@ -65,4 +72,5 @@ openai:
 google:
   ai:
     key: ${GOOGLE_AI_KEY}
+
 

@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RestController
 public class StoryController {
     @Resource
-//    @Qualifier("vertexAiChatClient")
+//    @Qualifier("geminiChatClient")
     @Qualifier("openAiChatClient")
     private ChatClient chatClient;
     @Resource
@@ -53,7 +53,8 @@ public class StoryController {
     private ImageGenerationTools imageGenerationTools;
     @Resource
     private ChatMemory chatMemory;
-    @Qualifier("openAiImageModel")
+//    @Qualifier("openAiImageModel")
+    @Qualifier("geminiImageModel")
     private ImageModel imageModel;
 
 

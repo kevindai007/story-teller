@@ -1,8 +1,10 @@
 package com.kevindai.storyteller.aiconfig;
 
+import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.document.MetadataMode;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.openai.api.OpenAiApi;
@@ -14,6 +16,8 @@ import org.springframework.context.annotation.Configuration;
 public class OpenAiClientConfig {
     @Value("${openai.api.key}")
     private String apiKey;
+    @Resource
+    private SyncMcpToolCallbackProvider mcpToolCallbackProvider;
 
     @Bean(name = "openAiChatClient")
     public ChatClient openAiChatClient() {
@@ -22,7 +26,7 @@ public class OpenAiClientConfig {
         OpenAiEmbeddingModel embeddingModel = new OpenAiEmbeddingModel(openAiApi);
         ChatClient.Builder builder = ChatClient.builder(chatModel);
         builder.defaultAdvisors(SimpleLoggerAdvisor.builder().build());
-
+        builder.defaultToolCallbacks(mcpToolCallbackProvider);
         return builder.build();
     }
 
