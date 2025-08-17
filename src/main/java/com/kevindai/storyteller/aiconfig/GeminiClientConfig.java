@@ -1,9 +1,11 @@
 package com.kevindai.storyteller.aiconfig;
 
 import com.kevindai.storyteller.model.gemini.*;
+import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.image.ImageModel;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,9 @@ public class GeminiClientConfig {
     @Value("${google.ai.key:}")
     private String googleAiKey;
     
+    @Resource
+    private SyncMcpToolCallbackProvider mcpToolCallbackProvider;
+
     @Bean
     public GeminiApiClient geminiApiClient() {
         return new GeminiApiClient(googleAiKey);
@@ -26,7 +31,7 @@ public class GeminiClientConfig {
         
         ChatClient.Builder builder = ChatClient.builder(chatModel);
         builder.defaultAdvisors(SimpleLoggerAdvisor.builder().build());
-        
+        builder.defaultToolCallbacks(mcpToolCallbackProvider);
         return builder.build();
     }
     
