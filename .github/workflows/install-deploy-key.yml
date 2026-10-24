@@ -1,0 +1,28 @@
+# Temporary: installs the music-sheet deploy key on the server using this repo's existing SSH secrets.
+# Delete this branch once it has run.
+name: Install music-sheet deploy key
+
+on:
+  push:
+    branches: [claude/install-deploy-key]
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    environment: oracle-node1
+    steps:
+      - uses: appleboy/ssh-action@v1.2.0
+        env:
+          DEPLOY_KEY: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE7o/BmyecVq3UFIRJvz6GBPvly4cxFvDdhkeevbevPX admin@Mac
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          envs: DEPLOY_KEY
+          script: |
+            set -e
+            mkdir -p ~/.ssh && chmod 700 ~/.ssh
+            touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys
+            grep -qxF "$DEPLOY_KEY" ~/.ssh/authorized_keys || echo "$DEPLOY_KEY" >> ~/.ssh/authorized_keys
+            echo "deploy key installed"
+            docker ps --format '{{.Names}}\t{{.Image}}\t{{.Ports}}'
