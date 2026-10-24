@@ -8,15 +8,6 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - name: Print Secrets
-        env:
-          PROD_HOST: ${{ secrets.PROD_HOST }}
-          PROD_USER: ${{ secrets.PROD_USER }}
-          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
-        run: |
-          echo "HOST: $PROD_HOST"
-          echo "USER: $PROD_USER"
-          echo "SSH KEY: $PROD_SSH_KEY"
       - uses: actions/checkout@v3
 
       - name: Set up JDK
